@@ -111,6 +111,10 @@ func (r *DNSRecordResource) Create(ctx context.Context, req resource.CreateReque
 
 	domain := data.Domain.ValueString()
 
+	// Serialize all read-modify-write operations on the same domain.
+	unlock := r.client.LockDomain(domain)
+	defer unlock()
+
 	// Read the current full record set.
 	records, err := r.client.GetDNSRecords(ctx, domain)
 	if err != nil {
@@ -204,6 +208,11 @@ func (r *DNSRecordResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	domain := data.Domain.ValueString()
+
+	// Serialize all read-modify-write operations on the same domain.
+	unlock := r.client.LockDomain(domain)
+	defer unlock()
+
 	records, err := r.client.GetDNSRecords(ctx, domain)
 	if err != nil {
 		resp.Diagnostics.AddError("Error Reading DNS Records", fmt.Sprintf("Could not read DNS records for domain %q: %s", domain, err))

@@ -16,6 +16,6 @@
 
 ## Handle operational edge cases
 
-- [ ] **Concurrent applies** — `mijnhost_dns_record` uses read-modify-write; two resources on the same domain applied in parallel can race and lose records. Options: document the `depends_on` workaround, or implement a local mutex keyed on domain name.
+- [x] **Concurrent applies** — `mijnhost_dns_record` uses read-modify-write; two resources on the same domain applied in parallel can race and lose records. Fixed with a per-domain mutex on the shared client (`Client.LockDomain`). Note: only protects within a single Terraform run; concurrent separate processes are not protected.
 - [ ] **Records outside Terraform** — document clearly that `mijnhost_dns_zone` will delete any record not listed in the resource, including records created outside Terraform (e.g. auto-added by mijn.host).
 - [ ] **API key rotation** — document the process for updating `MIJNHOST_API_KEY` without causing a provider outage.

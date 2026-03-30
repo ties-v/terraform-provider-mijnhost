@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 const defaultBaseURL = "https://mijn.host/api/v2"
@@ -17,6 +18,7 @@ type Client struct {
 	apiKey     string
 	httpClient *http.Client
 	baseURL    string
+	domainMu   sync.Map // map[string]*sync.Mutex — one mutex per domain
 }
 
 // NewClient creates a new mijn.host API client.
@@ -35,6 +37,22 @@ func newClientWithBaseURL(apiKey, baseURL string) *Client {
 		httpClient: &http.Client{},
 		baseURL:    baseURL,
 	}
+}
+
+// LockDomain acquires a per-domain mutex and returns a function that releases
+// it. Call it with defer to guarantee the lock is always released:
+//
+//	unlock := client.LockDomain(domain)
+//	defer unlock()
+//
+// This serializes all read-modify-write operations on the same domain within
+// a single Terraform run, preventing races between parallel resource applies.
+// Note: this does not protect against concurrent runs in separate processes.
+func (c *Client) LockDomain(domain string) func() {
+	v, _ := c.domainMu.LoadOrStore(domain, &sync.Mutex{})
+	mu := v.(*sync.Mutex)
+	mu.Lock()
+	return mu.Unlock
 }
 
 // DNSRecord represents a single DNS record.
