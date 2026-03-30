@@ -1,0 +1,28 @@
+# Compiled provider binary
+terraform-provider-mijnhost
+terraform-provider-mijnhost.exe
+
+# Go build artifacts
+/dist/
+
+# Terraform local files
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+.terraform.lock.hcl
+
+# Test coverage output
+coverage.out
+coverage.html
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
