@@ -54,8 +54,9 @@ func (r *DNSZoneResource) Metadata(_ context.Context, req resource.MetadataReque
 func (r *DNSZoneResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Manages the complete set of DNS records for a mijn.host domain. " +
-			"Any records not listed in this resource will be removed. " +
-			"Use mijnhost_dns_record for managing individual records without affecting others.",
+			"On every apply the entire record set is replaced with exactly what is listed here — " +
+			"any record not listed, including records added outside of Terraform or created automatically by mijn.host, will be deleted. " +
+			"Use mijnhost_dns_record instead to manage individual records without affecting others.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

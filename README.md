@@ -120,9 +120,13 @@ resource "mijnhost_dns_record" "spf" {
 
 ### `mijnhost_dns_zone`
 
-Manages the **complete set of DNS records** for a domain. Every record present in mijn.host that is not listed in this resource will be **deleted** on the next apply.
+Manages the **complete set of DNS records** for a domain. On every apply, the provider replaces the entire record set with exactly what is listed in this resource. Any record not listed — including records added outside of Terraform, records created by mijn.host automatically (e.g. default NS records), or records managed by other tools — **will be permanently deleted**.
 
-Use this resource when you want full declarative control of a zone. Use `mijnhost_dns_record` instead when you only want to manage specific records alongside records that are maintained outside of Terraform.
+> **Warning:** Before using this resource on an existing domain, retrieve the current records (e.g. via `dig` or the mijn.host control panel) and include all records you want to keep in the `records` set.
+
+Use this resource when you want full declarative control over a zone and accept that Terraform is the sole source of truth. Use `mijnhost_dns_record` instead when:
+- records are managed outside Terraform (e.g. by mijn.host automatically), or
+- you only want to manage a subset of records without affecting others.
 
 Deleting this resource removes it from Terraform state only — the DNS records remain in mijn.host, because the API does not accept an empty record set.
 

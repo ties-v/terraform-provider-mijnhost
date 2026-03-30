@@ -1,6 +1,13 @@
-# Manage the complete DNS zone for a domain.
-# WARNING: Any records not listed here will be DELETED from the zone.
-# This resource does a full replace on every apply.
+# WARNING: mijnhost_dns_zone replaces the ENTIRE record set on every apply.
+# Any record not listed here — including records added outside of Terraform
+# or created automatically by mijn.host — will be permanently deleted.
+#
+# Before applying this to an existing domain, check the current records:
+#   dig +short NS example.com
+#   dig +short ANY example.com
+#
+# Use mijnhost_dns_record instead if you only want to manage specific records
+# without affecting records maintained outside of Terraform.
 
 resource "mijnhost_dns_zone" "example" {
   domain = "example.com"
