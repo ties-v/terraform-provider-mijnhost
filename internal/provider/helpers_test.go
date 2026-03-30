@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"sort"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -65,12 +66,12 @@ func TestRecordsStateRoundTrip(t *testing.T) {
 		{Type: "TXT", Name: "example.com", Value: "v=spf1 ~all", TTL: 600},
 	}
 
-	listVal, diags := recordsToState(ctx, input)
+	setVal, diags := recordsToState(ctx, input)
 	if diags.HasError() {
 		t.Fatalf("recordsToState error: %v", diags)
 	}
 
-	output, diags := recordsFromState(ctx, listVal)
+	output, diags := recordsFromState(ctx, setVal)
 	if diags.HasError() {
 		t.Fatalf("recordsFromState error: %v", diags)
 	}
@@ -78,6 +79,16 @@ func TestRecordsStateRoundTrip(t *testing.T) {
 	if len(output) != len(input) {
 		t.Fatalf("len = %d, want %d", len(output), len(input))
 	}
+
+	// Sets are unordered, so sort both slices before comparing.
+	sortRecords := func(r []mijnhost.DNSRecord) {
+		sort.Slice(r, func(i, j int) bool {
+			return r[i].Type+r[i].Name+r[i].Value < r[j].Type+r[j].Name+r[j].Value
+		})
+	}
+	sortRecords(input)
+	sortRecords(output)
+
 	for i := range input {
 		if output[i] != input[i] {
 			t.Errorf("record[%d]: got %+v, want %+v", i, output[i], input[i])
@@ -88,13 +99,13 @@ func TestRecordsStateRoundTrip(t *testing.T) {
 func TestRecordsToState_empty(t *testing.T) {
 	ctx := context.Background()
 
-	listVal, diags := recordsToState(ctx, []mijnhost.DNSRecord{})
+	setVal, diags := recordsToState(ctx, []mijnhost.DNSRecord{})
 	if diags.HasError() {
 		t.Fatalf("unexpected error: %v", diags)
 	}
 
 	var models []dnsRecordModel
-	diags = listVal.ElementsAs(ctx, &models, false)
+	diags = setVal.ElementsAs(ctx, &models, false)
 	if diags.HasError() {
 		t.Fatalf("ElementsAs error: %v", diags)
 	}
@@ -103,35 +114,9 @@ func TestRecordsToState_empty(t *testing.T) {
 	}
 }
 
-func TestRecordsToState_preservesOrder(t *testing.T) {
-	ctx := context.Background()
-
-	input := []mijnhost.DNSRecord{
-		{Type: "A", Name: "a.example.com", Value: "1.1.1.1", TTL: 100},
-		{Type: "A", Name: "b.example.com", Value: "2.2.2.2", TTL: 200},
-		{Type: "A", Name: "c.example.com", Value: "3.3.3.3", TTL: 300},
-	}
-
-	listVal, diags := recordsToState(ctx, input)
-	if diags.HasError() {
-		t.Fatalf("recordsToState error: %v", diags)
-	}
-
-	elements := listVal.Elements()
-	for i, elem := range elements {
-		obj := elem.(types.Object)
-		name := obj.Attributes()["name"].(types.String).ValueString()
-		if name != input[i].Name {
-			t.Errorf("element[%d] name = %q, want %q", i, name, input[i].Name)
-		}
-	}
-}
-
 // --- dnsRecordAttrTypes ---
 
 func TestDNSRecordAttrTypes(t *testing.T) {
-	// Verify the attr type map matches what ObjectValue expects.
-	ctx := context.Background()
 	_, diags := types.ObjectValue(dnsRecordAttrTypes, map[string]attr.Value{
 		"type":  types.StringValue("A"),
 		"name":  types.StringValue("example.com"),
@@ -141,5 +126,4 @@ func TestDNSRecordAttrTypes(t *testing.T) {
 	if diags.HasError() {
 		t.Errorf("ObjectValue with dnsRecordAttrTypes failed: %v", diags)
 	}
-	_ = ctx
 }

@@ -10,9 +10,9 @@
 
 ## Test against a real domain
 
-- [ ] Run `make testacc` with `MIJNHOST_API_KEY` and `MIJNHOST_TEST_DOMAIN` set
-- [ ] Set `MIJNHOST_TEST_ZONE_DOMAIN` and run the zone resource acceptance test (currently always skipped)
-- [ ] Confirm all idempotency steps pass (re-apply produces an empty plan)
+- [x] Run `make testacc` with `MIJNHOST_API_KEY` and `MIJNHOST_TEST_DOMAIN` set
+- [x] Set `MIJNHOST_TEST_ZONE_DOMAIN` and run the zone resource acceptance test (currently always skipped)
+- [x] Confirm all idempotency steps pass (re-apply produces an empty plan)
 
 ## Handle operational edge cases
 

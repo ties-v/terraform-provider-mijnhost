@@ -25,7 +25,7 @@ type DNSZoneResource struct {
 type DNSZoneResourceModel struct {
 	ID      types.String `tfsdk:"id"`
 	Domain  types.String `tfsdk:"domain"`
-	Records types.List   `tfsdk:"records"`
+	Records types.Set    `tfsdk:"records"`
 }
 
 // dnsRecordModel is the nested record object within the zone.
@@ -60,6 +60,9 @@ func (r *DNSZoneResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The domain name (used as the resource ID).",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"domain": schema.StringAttribute{
 				Required:    true,
@@ -68,7 +71,7 @@ func (r *DNSZoneResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"records": schema.ListNestedAttribute{
+			"records": schema.SetNestedAttribute{
 				Required:    true,
 				Description: "The complete set of DNS records for the domain. All existing records not listed here will be deleted.",
 				NestedObject: schema.NestedAttributeObject{
@@ -150,13 +153,13 @@ func (r *DNSZoneResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	listVal, diags := recordsToState(ctx, records)
+	setVal, diags := recordsToState(ctx, records)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	data.Records = listVal
+	data.Records = setVal
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -187,10 +190,10 @@ func (r *DNSZoneResource) Delete(_ context.Context, _ resource.DeleteRequest, _ 
 	// only removes it from Terraform state. The DNS records remain in mijn.host.
 }
 
-// recordsFromState converts a types.List of records into []mijnhost.DNSRecord.
-func recordsFromState(ctx context.Context, list types.List) ([]mijnhost.DNSRecord, diag.Diagnostics) {
+// recordsFromState converts a types.Set of records into []mijnhost.DNSRecord.
+func recordsFromState(ctx context.Context, set types.Set) ([]mijnhost.DNSRecord, diag.Diagnostics) {
 	var models []dnsRecordModel
-	diags := list.ElementsAs(ctx, &models, false)
+	diags := set.ElementsAs(ctx, &models, false)
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -207,8 +210,8 @@ func recordsFromState(ctx context.Context, list types.List) ([]mijnhost.DNSRecor
 	return records, diags
 }
 
-// recordsToState converts []mijnhost.DNSRecord into a types.List suitable for Terraform state.
-func recordsToState(ctx context.Context, records []mijnhost.DNSRecord) (types.List, diag.Diagnostics) {
+// recordsToState converts []mijnhost.DNSRecord into a types.Set suitable for Terraform state.
+func recordsToState(ctx context.Context, records []mijnhost.DNSRecord) (types.Set, diag.Diagnostics) {
 	objectType := types.ObjectType{AttrTypes: dnsRecordAttrTypes}
 
 	elements := make([]attr.Value, len(records))
@@ -220,10 +223,10 @@ func recordsToState(ctx context.Context, records []mijnhost.DNSRecord) (types.Li
 			"ttl":   types.Int64Value(rec.TTL),
 		})
 		if diags.HasError() {
-			return types.ListNull(objectType), diags
+			return types.SetNull(objectType), diags
 		}
 		elements[i] = obj
 	}
 
-	return types.ListValue(objectType, elements)
+	return types.SetValue(objectType, elements)
 }
