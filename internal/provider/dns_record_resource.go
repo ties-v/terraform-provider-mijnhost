@@ -45,6 +45,9 @@ func (r *DNSRecordResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "Unique identifier for this DNS record, in the format domain/type/name/value.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"domain": schema.StringAttribute{
 				Required:    true,
