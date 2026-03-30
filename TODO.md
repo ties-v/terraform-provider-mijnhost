@@ -2,11 +2,11 @@
 
 ## Publish the provider
 
-- [ ] Set up GPG key for release signing — generate with `gpg --full-generate-key`, add `GPG_PRIVATE_KEY` and `GPG_PASSPHRASE` to GitHub Actions secrets
+- [x] Set up GPG key for release signing
 - [x] Create a GoReleaser config to build and sign binaries for all target platforms
 - [x] Create a GitHub Actions workflow that triggers a release on tag push
-- [ ] Register the provider on the OpenTofu registry — submit via https://github.com/opentofu/registry/issues/new?template=provider.yml with `ties-v/terraform-provider-mijnhost`
-- [ ] Update README with installation instructions once published (remove "build from source" as the primary path)
+- [x] Register the provider on the OpenTofu registry — PR pending merge
+- [ ] Update README with installation instructions once the registry PR is merged
 
 ## Test against a real domain
 
