@@ -6,7 +6,7 @@
 - [x] Create a GoReleaser config to build and sign binaries for all target platforms
 - [x] Create a GitHub Actions workflow that triggers a release on tag push
 - [x] Register the provider on the OpenTofu registry — PR pending merge
-- [ ] Update README with installation instructions once the registry PR is merged
+- [x] Update README with installation instructions once the registry PR is merged
 
 ## Test against a real domain
 

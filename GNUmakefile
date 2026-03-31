@@ -30,4 +30,8 @@ fmt:
 vet:
 	go vet ./...
 
-.PHONY: build install test fmt vet
+docs:
+	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+	tfplugindocs generate --provider-name mijnhost
+
+.PHONY: build install test testacc fmt vet docs

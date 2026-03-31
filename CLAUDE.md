@@ -13,6 +13,7 @@ make test       # unit tests (no API key needed)
 make testacc    # acceptance tests (requires env vars — see below)
 make fmt        # gofmt -s -w .
 make vet        # go vet ./...
+make docs       # regenerate docs/ from schema + examples/ using tfplugindocs
 ```
 
 Go is installed at `/var/lib/snapd/snap/bin/go` on this machine.

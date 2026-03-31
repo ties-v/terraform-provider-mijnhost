@@ -5,8 +5,22 @@ An OpenTofu / Terraform provider for managing DNS records on [mijn.host](https:/
 ## Requirements
 
 - [OpenTofu](https://opentofu.org) >= 1.6 or [Terraform](https://www.terraform.io) >= 1.5
-- [Go](https://golang.org) >= 1.21 (to build from source)
 - A mijn.host account with API access enabled
+
+## Installation
+
+Add the provider to your `required_providers` block and run `tofu init`:
+
+```hcl
+terraform {
+  required_providers {
+    mijnhost = {
+      source  = "ties-v/mijnhost"
+      version = "~> 0.1"
+    }
+  }
+}
+```
 
 ## Getting an API key
 
@@ -14,15 +28,11 @@ Log in to the [mijn.host control panel](https://mijn.host/cp/), navigate to **Ac
 
 ## Building from source
 
+Requires [Go](https://golang.org) >= 1.21.
+
 ```bash
 git clone https://github.com/ties-v/terraform-provider-mijnhost.git
 cd terraform-provider-mijnhost
-make build
-```
-
-To install the provider locally for development:
-
-```bash
 make install
 ```
 
