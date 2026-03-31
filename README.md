@@ -46,7 +46,7 @@ This places the binary in `~/.terraform.d/plugins/registry.terraform.io/ties-v/m
 terraform {
   required_providers {
     mijnhost = {
-      source  = "tieum/mijnhost"
+      source  = "ties-v/mijnhost"
       version = "~> 0.1"
     }
   }
@@ -70,7 +70,7 @@ The API key can be provided via:
 
 Manages a **single DNS record** for a domain. Other records in the zone are not affected.
 
-Because the mijn.host API has no per-record create or delete endpoint, this resource uses a read-modify-write strategy: it reads the full record set, adds or removes the target record, then writes the full set back. Avoid applying multiple `mijnhost_dns_record` resources for the same domain in parallel (use `depends_on` or `-parallelism=1`) to prevent race conditions.
+Because the mijn.host API has no per-record create or delete endpoint, this resource uses a read-modify-write strategy: it reads the full record set, adds or removes the target record, then writes the full set back. A per-domain mutex ensures that multiple `mijnhost_dns_record` resources on the same domain are applied sequentially within a single Terraform run.
 
 Changes to `domain`, `type`, `name`, or `value` force a new resource. Only `ttl` can be updated in place.
 
@@ -180,7 +180,7 @@ resource "mijnhost_dns_zone" "example" {
 | Argument  | Type   | Required | Description |
 |-----------|--------|----------|-------------|
 | `domain`  | string | yes | The domain name. Forces new resource on change. |
-| `records` | list   | yes | The complete desired set of DNS records (see nested schema below). |
+| `records` | set    | yes | The complete desired set of DNS records (see nested schema below). |
 
 **`records` nested schema:**
 
