@@ -1,6 +1,6 @@
 # terraform-provider-mijnhost
 
-An OpenTofu / Terraform provider for managing DNS records on [mijn.host](https://mijn.host).
+An [OpenTofu](https://search.opentofu.org/provider/ties-v/mijnhost) / [Terraform](https://registry.terraform.io/providers/ties-v/mijnhost) provider for managing DNS records on [mijn.host](https://mijn.host).
 
 ## Requirements
 
